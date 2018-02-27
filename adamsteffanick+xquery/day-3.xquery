@@ -44,9 +44,7 @@ declare function local:spiral-memory(
   let $squares-within-ring := (
     for $ring in (1 to $target-ring)
     let $squares := (
-      fn:count(
-        $access-port
-      ),
+      fn:count($access-port),
       for $rings in (1 to $ring)
       return (
         $ring-perimeters[$rings]
