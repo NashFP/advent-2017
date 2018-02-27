@@ -82,7 +82,7 @@ declare function local:corruption-checksum(
 };
 
 let $puzzle-input := (
-  ""  (: paste puzzle input here :)
+  "" (: paste puzzle input here :)
 )
 let $solution-part-one := (
   local:corruption-checksum($puzzle-input, 1)
