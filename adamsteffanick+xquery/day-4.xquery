@@ -1,0 +1,114 @@
+xquery version "3.1" encoding "UTF-8";
+
+(:~
+ : A function to solve Advent of Code 2017 Day 4 parts one and two.
+ : @see http://adventofcode.com/2017/day/4
+ :
+ : @author Adam Steffanick
+ : @see https://www.steffanick.com/adam/
+ : @version v1.0.0
+ : @see https://github.com/AdamSteffanick/aoc-xquery
+ : March 1, 2018
+ :
+ : LICENSE: MIT License
+ : @see: https://github.com/AdamSteffanick/aoc-xquery/blob/master/LICENSE
+ :
+ : @param $puzzle-input is a string used to solve the puzzle
+ : @param $part is an integer representing a part of the puzzle
+ : @return Puzzle solution
+ :)
+
+declare function local:high-entropy-passphrases(
+  $puzzle-input as xs:string,
+  $part as xs:integer
+) as xs:integer
+{
+  let $get-words := (
+    function (
+      $string as xs:string
+    ) as xs:string+
+    {
+      fn:tokenize(
+        $string,
+        "\s"
+      )
+    }
+  )
+  let $rearrange-letters := (
+    function (
+      $sequence as xs:string+
+    ) as xs:string+
+    {
+      for $item in $sequence
+      let $characters := (
+        array {
+          fn:string-to-codepoints($item)
+          => fn:sort()
+          => fn:codepoints-to-string()
+        }
+      )
+      return (
+        array:flatten($characters)
+      )
+    }
+  )
+  let $validate-passphrase := (
+    function (
+      $sequence as xs:string+
+    ) as xs:boolean
+    {
+      fn:deep-equal(
+        fn:distinct-values($sequence),
+        $sequence
+      )
+    }
+  )
+  let $passphrase-list := (
+    fn:tokenize(
+      $puzzle-input,
+      "[\r\n,\r,\n]"
+    )
+  )
+  let $solution := fn:count(
+    for $passphrase in $passphrase-list
+    let $validity := (
+      if (
+        $part = 1
+      )
+      then (
+        $get-words($passphrase)
+        => $validate-passphrase()
+      )
+      else if (
+        $part = 2
+      )
+      then (
+        $get-words($passphrase)
+        => $rearrange-letters()
+        => $validate-passphrase()
+      )
+      else ()
+    )
+    where $validity = fn:true()
+    return (
+      fn:true()
+    )
+  )
+  return (
+    $solution
+  )
+};
+
+let $puzzle-input := (
+  "" (: paste puzzle input here :)
+)
+let $solution-part-one := (
+  local:high-entropy-passphrases($puzzle-input, 1)
+)
+let $solution-part-two := (
+  local:high-entropy-passphrases($puzzle-input, 2)
+)
+return (
+  $solution-part-one,
+  $solution-part-two
+)
