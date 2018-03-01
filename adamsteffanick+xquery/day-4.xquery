@@ -6,7 +6,7 @@ xquery version "3.1" encoding "UTF-8";
  :
  : @author Adam Steffanick
  : @see https://www.steffanick.com/adam/
- : @version v1.0.0
+ : @version v1.0.1
  : @see https://github.com/AdamSteffanick/aoc-xquery
  : March 1, 2018
  :
@@ -25,41 +25,40 @@ declare function local:high-entropy-passphrases(
 {
   let $get-words := (
     function (
-      $string as xs:string
+      $passphrase as xs:string
     ) as xs:string+
     {
       fn:tokenize(
-        $string,
+        $passphrase,
         "\s"
       )
     }
   )
   let $rearrange-letters := (
     function (
-      $sequence as xs:string+
+      $passphrase as xs:string+
     ) as xs:string+
     {
-      for $item in $sequence
-      let $characters := (
-        array {
-          fn:string-to-codepoints($item)
-          => fn:sort()
-          => fn:codepoints-to-string()
-        }
+      for $word in $passphrase
+      let $rearranged-word := (
+        $word
+        => fn:string-to-codepoints()
+        => fn:sort()
+        => fn:codepoints-to-string()
       )
       return (
-        array:flatten($characters)
+        $rearranged-word
       )
     }
   )
   let $validate-passphrase := (
     function (
-      $sequence as xs:string+
+      $passphrase as xs:string+
     ) as xs:boolean
     {
       fn:deep-equal(
-        fn:distinct-values($sequence),
-        $sequence
+        fn:distinct-values($passphrase),
+        $passphrase
       )
     }
   )
@@ -76,14 +75,16 @@ declare function local:high-entropy-passphrases(
         $part = 1
       )
       then (
-        $get-words($passphrase)
+        $passphrase
+        => $get-words()
         => $validate-passphrase()
       )
       else if (
         $part = 2
       )
       then (
-        $get-words($passphrase)
+        $passphrase
+        => $get-words()
         => $rearrange-letters()
         => $validate-passphrase()
       )
