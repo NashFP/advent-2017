@@ -6,7 +6,7 @@ xquery version "3.1" encoding "UTF-8";
  :
  : @author Adam Steffanick
  : @see https://www.steffanick.com/adam/
- : @version v1.0.1
+ : @version v1.0.2
  : @see https://github.com/AdamSteffanick/aoc-xquery
  : March 1, 2018
  :
@@ -28,10 +28,8 @@ declare function local:high-entropy-passphrases(
       $passphrase as xs:string
     ) as xs:string+
     {
-      fn:tokenize(
-        $passphrase,
-        "\s"
-      )
+      $passphrase
+      => fn:tokenize("\s")
     }
   )
   let $rearrange-letters := (
@@ -63,10 +61,8 @@ declare function local:high-entropy-passphrases(
     }
   )
   let $passphrase-list := (
-    fn:tokenize(
-      $puzzle-input,
-      "[\r\n,\r,\n]"
-    )
+    $puzzle-input
+    => fn:tokenize("[\r\n,\r,\n]")
   )
   let $solution := fn:count(
     for $passphrase in $passphrase-list
