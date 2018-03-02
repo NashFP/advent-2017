@@ -6,7 +6,7 @@ xquery version "3.1" encoding "UTF-8";
  :
  : @author Adam Steffanick
  : @see https://www.steffanick.com/adam/
- : @version v1.0.2
+ : @version v1.0.3
  : @see https://github.com/AdamSteffanick/aoc-xquery
  : March 1, 2018
  :
@@ -23,6 +23,15 @@ declare function local:high-entropy-passphrases(
   $part as xs:integer
 ) as xs:integer
 {
+  let $get-passphrases := (
+    function (
+      $passhrase-list as xs:string
+    ) as xs:string+
+    {
+      $passhrase-list
+      => fn:tokenize("[\r\n,\r,\n]")
+    }
+  )
   let $get-words := (
     function (
       $passphrase as xs:string
@@ -49,47 +58,53 @@ declare function local:high-entropy-passphrases(
       )
     }
   )
-  let $validate-passphrase := (
+  let $evaluate-passphrase := (
     function (
       $passphrase as xs:string+
     ) as xs:boolean
     {
-      fn:deep-equal(
-        fn:distinct-values($passphrase),
-        $passphrase
+      $passphrase
+      => fn:distinct-values()
+      => fn:deep-equal($passphrase)
+    }
+  )
+  let $validate-passphrases := (
+    function (
+      $passphrase-list as xs:string+
+    ) as xs:boolean+
+    {
+      for $passphrase in $passphrase-list
+      let $validity := (
+        if (
+          $part = 1
+        )
+        then (
+          $passphrase
+          => $get-words()
+          => $evaluate-passphrase()
+        )
+        else if (
+          $part = 2
+        )
+        then (
+          $passphrase
+          => $get-words()
+          => $rearrange-letters()
+          => $evaluate-passphrase()
+        )
+        else ()
+      )
+      where $validity = fn:true()
+      return (
+        fn:true()
       )
     }
   )
-  let $passphrase-list := (
+  let $solution := (
     $puzzle-input
-    => fn:tokenize("[\r\n,\r,\n]")
-  )
-  let $solution := fn:count(
-    for $passphrase in $passphrase-list
-    let $validity := (
-      if (
-        $part = 1
-      )
-      then (
-        $passphrase
-        => $get-words()
-        => $validate-passphrase()
-      )
-      else if (
-        $part = 2
-      )
-      then (
-        $passphrase
-        => $get-words()
-        => $rearrange-letters()
-        => $validate-passphrase()
-      )
-      else ()
-    )
-    where $validity = fn:true()
-    return (
-      fn:true()
-    )
+    => $get-passphrases()
+    => $validate-passphrases()
+    => fn:count()
   )
   return (
     $solution
@@ -97,7 +112,7 @@ declare function local:high-entropy-passphrases(
 };
 
 let $puzzle-input := (
-  "" (: paste puzzle input here :)
+  "" (: paste puzzle input within quotes :)
 )
 let $solution-part-one := (
   local:high-entropy-passphrases($puzzle-input, 1)
