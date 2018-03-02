@@ -6,9 +6,9 @@ xquery version "3.1" encoding "UTF-8";
  :
  : @author Adam Steffanick
  : @see https://www.steffanick.com/adam/
- : @version v1.0.3
+ : @version v1.0.4
  : @see https://github.com/AdamSteffanick/aoc-xquery
- : March 1, 2018
+ : March 2, 2018
  :
  : LICENSE: MIT License
  : @see: https://github.com/AdamSteffanick/aoc-xquery/blob/master/LICENSE
@@ -114,13 +114,11 @@ declare function local:high-entropy-passphrases(
 let $puzzle-input := (
   "" (: paste puzzle input within quotes :)
 )
-let $solution-part-one := (
-  local:high-entropy-passphrases($puzzle-input, 1)
-)
-let $solution-part-two := (
-  local:high-entropy-passphrases($puzzle-input, 2)
+let $solve-puzzle := (
+  $puzzle-input
+  => local:high-entropy-passphrases(?)
 )
 return (
-  $solution-part-one,
-  $solution-part-two
+  $solve-puzzle(1),
+  $solve-puzzle(2)
 )
