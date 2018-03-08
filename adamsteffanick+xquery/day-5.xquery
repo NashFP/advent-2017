@@ -6,7 +6,7 @@ xquery version "3.1" encoding "UTF-8";
  :
  : @author Adam Steffanick
  : @see https://www.steffanick.com/adam/
- : @version v2.0.0
+ : @version v2.1.0
  : @see https://github.com/AdamSteffanick/aoc-xquery
  : March 8, 2018
  :
@@ -26,60 +26,55 @@ declare function local:maze-of-twisty-trampolines(
   let $get-jump-instructions := (
     function (
       $jump-instructions as xs:string
-    ) as array(*)
+    ) as map(*)
     {
       let $jump-offsets := (
         $jump-instructions
         => fn:tokenize("[\r\n,\r,\n]")
       )
-      let $instructions-array := (
-        array {
-          for $jump-offset in $jump-offsets
-          return (
-            xs:integer($jump-offset)
+      let $instructions := (
+        map:merge((
+          for $jump-instruction in (1 to fn:count($jump-offsets))
+          let $jump-offset := (
+            xs:integer($jump-offsets[$jump-instruction])
           )
-        }
+          return (
+            map:entry($jump-instruction, $jump-offset)
+          ),
+          map:entry("position", 1),
+          map:entry("step", 0)
+        ))
       )
       return (
-        $instructions-array
+        $instructions
       )
-    }
-  )
-  let $encode-instructions := (
-    function (
-      $instructions-array as array(*)
-    ) as item()+
-    {
-      $instructions-array,
-      1,
-      0
     }
   )
   let $jump := (
     function (
-      $encoded-instructions as item()+
-    ) as item()+
+      $instructions as map(*)
+    ) as map(*)
     {
-      let $instructions := (
-        $encoded-instructions[1]
-      )
       let $position := (
-        $encoded-instructions[2]
+        $instructions
+        => map:get("position")
       )
       let $step := (
-        $encoded-instructions[3]
+        $instructions
+        => map:get("step")
       )
       return (
         if (
-          $position > array:size($instructions)
+          $position > map:size($instructions) - 2
         )
         then (
-          -1559436844
+          $instructions
+          => map:remove("position")
         )
         else (
           let $instruction := (
             $instructions
-            => array:get($position)
+            => map:get($position)
           )
           let $new-instruction := (
             if (
@@ -104,10 +99,6 @@ declare function local:maze-of-twisty-trampolines(
             )
             else ()
           )
-          let $new-instructions := (
-            $instructions
-            => array:put($position, $new-instruction)
-          )
           let $new-position := (
             $position + $instruction
           )
@@ -115,9 +106,10 @@ declare function local:maze-of-twisty-trampolines(
             $step + 1
           )
           return (
-            $new-instructions,
-            $new-position,
-            $new-step
+            $instructions
+            => map:put($position, $new-instruction)
+            => map:put("position", $new-position)
+            => map:put("step", $new-step)
           )
         )
       )
@@ -125,33 +117,31 @@ declare function local:maze-of-twisty-trampolines(
   )
   let $escape := (
     function (
-      $encoded-instructions as item()+
-    ) as item()+
+      $instructions as map(*)
+    ) as map(*)
     {
       hof:until(
         function (
-          $exit as item()+
-        ) as item()+
+          $exit as map(*)
+        ) as xs:boolean
         {
-          $jump($exit) = -1559436844
+          map:contains($exit, "position") => fn:not()
         },
         function (
-          $land as item()+
-        ) as item()+
+          $land as map(*)
+        ) as map(*)
         {
           $jump($land)
         },
-        $encoded-instructions
+        $instructions
       )
     }
   )
   let $solution := (
     $puzzle-input
     => $get-jump-instructions()
-    => $encode-instructions()
     => $escape()
-    => fn:reverse()
-    => fn:head()
+    => map:get("step")
   )
   return (
     $solution
