@@ -158,7 +158,7 @@ declare function local:inverse-captcha(
 };
 
 let $puzzle-input := (
-  "" (: paste puzzle input here :)
+  "" (: paste puzzle input within quotes :)
 )
 let $solve-puzzle := (
   $puzzle-input
